@@ -1,0 +1,13 @@
+.env
+__pycache__/
+*.pyc
+data/memory/
+data/checkpoints/
+dream_logs/
+*.npy
+*.pt
+*.pth
+storage/
+data/*
+!data/vocab.json
+!data/ascii_palettes.json
