@@ -1,0 +1,73 @@
+<style>
+.wc::-webkit-scrollbar, #ntl::-webkit-scrollbar { display: none; }
+.wc, #ntl { -ms-overflow-style: none; scrollbar-width: none; }
+#asc{background:#fff;color:#000;padding:0;overflow:hidden;width:420px;min-height:380px;position:relative;}
+.nl{position:absolute;top:10px;left:10px;right:10px;bottom:10px;background:#fff;display:flex;flex-direction:column;transition:opacity 0.3s;}
+#ntl{z-index:2;overflow-y:auto;}
+#nil{z-index:1;opacity:0;align-items:center;justify-content:center;}
+.mono{font-family:"Courier New",Courier,monospace;}
+#ns{font-size:11px;line-height:1.4;white-space:pre-wrap;margin-bottom:4px;font-weight:bold;}
+#nt{font-size:10px;line-height:1.2;color:#555;margin-bottom:4px;}
+#ni{font-size:10px;line-height:1.3;margin-top:4px;border-top:1px dotted #000;padding-top:3px;}
+#nx{font-size:11px;line-height:1.4;margin-bottom:4px;padding:3px 0;border-bottom:1px dotted #000;white-space:pre-wrap;}
+#nr{font-size:10px;line-height:1.3;color:#333;margin:4px 0;padding:3px 0;}
+#ad{font-size:7px;line-height:7px;white-space:pre;text-align:left;user-select:none;}
+#nf{font-size:10px;color:#555;border-top:1px solid #333;padding-top:3px;margin-top:4px;}
+.doubt{font-style:italic;color:#555;} .confirm{font-weight:bold;} .question{text-decoration:underline;}
+.ni .q{font-weight:bold;} .ni .a{margin-bottom:2px;} .ni .ass{font-style:italic;margin-top:3px;}
+.nr .comp{font-weight:bold;} .nr .d-msg{font-style:italic;} .nr .step{color:#666;} .nr .ref{font-weight:bold;}
+</style>
+<div class="wc" id="asc">
+    <div id="ntl" class="nl mono">
+        <div id="ns">> initializing neural network v2...</div>
+        <div id="nt"></div><div id="nx"></div><div id="nr"></div><div id="ni"></div>
+    </div>
+    <div id="nil" class="nl mono">
+        <div id="ad"></div><div id="nf"></div>
+    </div>
+</div>
+<script>
+    (function(){
+        const NW=document.getElementById('neuro-window'), ntl=document.getElementById('ntl'), nil=document.getElementById('nil'), ns=document.getElementById('ns'), ad=document.getElementById('ad'), nf=document.getElementById('nf');
+        let aF=[], aI=null;
+
+        async function conn(){
+            try{
+                let r=await fetch(`${API_BASE_URL}/api/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({screen_width:innerWidth,screen_height:innerHeight})});
+                let reader=r.body.getReader(), dec=new TextDecoder(), buf='';
+                while(1){
+                    let {done,value}=await reader.read(); if(done)break;
+                    buf+=dec.decode(value,{stream:true}); let p=buf.split('\n\n'); buf=p.pop();
+                    for(let pt of p){
+                        let ev='', d='';
+                        for(let ln of pt.split('\n')){if(ln.startsWith('event: '))ev=ln.slice(7); if(ln.startsWith('data: '))d=ln.slice(6);}
+                        if(ev&&d)try{hE(ev,JSON.parse(d));}catch(e){}
+                    }
+                }
+            }catch(e){ns.innerHTML+=`\n> error: ${e.message}`;}
+        }
+
+        function S(id, h) { document.getElementById(id).innerHTML=h; }
+        function App(id, h) { document.getElementById(id).innerHTML+=h; ntl.scrollTop=ntl.scrollHeight; }
+
+        function hE(t, d) {
+            if(t==='config'){
+                if(d.window_style) Object.assign(NW.style, d.window_style);
+                if(d.container_style) Object.assign(document.getElementById('asc').style, d.container_style);
+                ns.innerHTML='> connected...'; S('nt',''); S('nx',''); S('nr',''); S('ni',''); ad.innerHTML='';
+                aF=[]; if(aI){clearInterval(aI);aI=null;}
+            } 
+            else if(t==='log') { App('ns', '\n'+d.text); let ls=ns.innerHTML.split('\n'); if(ls.length>15) ns.innerHTML=ls.slice(-15).join('\n'); }
+            else if(t==='set_html') S(d.id, d.html);
+            else if(t==='append_html') App(d.id, d.html);
+            else if(t==='ui_layer'){
+                if(d.layer==='text'){ntl.style.opacity=1;ntl.style.zIndex=2;nil.style.opacity=0;nil.style.zIndex=1;}
+                else {ntl.style.opacity=0;ntl.style.zIndex=1;nil.style.opacity=1;nil.style.zIndex=2;}
+            }
+            else if(t==='anim_add_frame') { if(d.footer) nf.innerHTML=d.footer; ad.innerHTML=d.ascii; aF.push(d.ascii); }
+            else if(t==='anim_start') { if(aF.length>1){ let idx=0; aI=setInterval(()=>{ad.innerHTML=aF[idx];idx=(idx+1)%aF.length;},200);} }
+        }
+
+        setTimeout(conn, 800);
+    })();
+</script>
