@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>astoriel // OS Portfolio</title>
+    <style>
+        :root {
+            /* Паттерн диттеринга для рабочего стола Classic Mac OS (System 7) */
+            --mac-bg: url('data:image/svg+xml;utf8,<svg width="4" height="4" xmlns="http://www.w3.org/2000/svg"><rect width="4" height="4" fill="%23fff" /><rect width="2" height="2" fill="%23aaa" /><rect x="2" y="2" width="2" height="2" fill="%23aaa" /></svg>');
+            --window-bg: #ffffff;
+            --border: 2px solid #000;
+        }
+
+        body {
+            background: var(--mac-bg) repeat;
+            font-family: "MS Sans Serif", "Microsoft Sans Serif", "Geneva", "Chicago", sans-serif;
+            -webkit-font-smoothing: none; /* Убираем сглаживание для пиксельного ретро-лука */
+            font-smooth: never;
+            color: #000;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Запрещаем скролл самого окна */
+            user-select: none;
+        }
+
+        .menu-bar {
+            background: #fff;
+            border-bottom: var(--border);
+            height: 24px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-family: "Chicago", "MS Sans Serif", "Arial", sans-serif;
+            font-weight: bold;
+            font-size: 13px;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+        }
+
+        .menu-item {
+            padding: 2px 10px;
+            cursor: default;
+        }
+
+        .menu-item:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        /* Область рабочего стола */
+        .desktop {
+            position: absolute;
+            top: 26px; /* Ниже меню */
+            left: 0; right: 0; bottom: 0;
+            padding: 20px;
+        }
+
+        /* Классическое окно Mac OS */
+        .window {
+            position: absolute;
+            background: var(--window-bg);
+            border: var(--border);
+            box-shadow: 2px 2px 0 #000;
+            display: flex;
+            flex-direction: column;
+            min-width: 250px;
+            z-index: 10;
+        }
+
+        /* Заголовок окна (Title Bar) с паралельными линиями */
+        .title-bar {
+            height: 18px;
+            border-bottom: var(--border);
+            display: flex;
+            align-items: center;
+            padding: 2px;
+            position: relative;
+            background: repeating-linear-gradient(
+                0deg,
+                #fff,
+                #fff 1px,
+                #000 1px,
+                #000 2px
+            );
+        }
+
+        /* Кнопка закрытия */
+        .close-box {
+            width: 13px;
+            height: 13px;
+            border: 1px solid #000;
+            background: #fff;
+            margin-left: 4px;
+        }
+        
+        .close-box:active {
+            background: #000;
+        }
+
+        /* Текст заголовка на белом фоне */
+        .title-text {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 0 8px;
+            font-family: "Chicago", "MS Sans Serif", sans-serif;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        /* Контент окна */
+        .window-content {
+            padding: 15px;
+            font-size: 13px;
+            line-height: 1.4;
+            max-height: 400px;
+            overflow-y: auto;
+            cursor: text;
+            user-select: text;
+        }
+
+        .window-content h1, .window-content h2 {
+            font-size: 16px;
+            margin-top: 0;
+            border-bottom: 2px solid #000;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 0 0 10px 0;
+        }
+
+        ul {
+            list-style-type: square;
+            padding-left: 20px;
+            margin-top: 0;
+        }
+
+        a {
+            color: #000;
+            text-decoration: none;
+            border-bottom: 1px solid #000;
+        }
+        
+        a:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        .project {
+            margin-bottom: 15px;
+        }
+        .project-title { font-weight: bold; }
+        .project-desc { display: block; font-size: 0.9em; margin-top: 3px; }
+
+        /* Иконка корзины на рабочем столе */
+        .desktop-icon {
+            position: absolute;
+            width: 60px;
+            text-align: center;
+            font-size: 11px;
+            font-family: "Geneva", "MS Sans Serif", sans-serif;
+            background: #fff;
+            padding: 2px;
+            cursor: pointer;
+            border: 1px dotted transparent;
+            font-weight: bold;
+        }
+        
+        .desktop-icon:active {
+            background: #000;
+            color: #fff;
+            border: 1px dotted #fff;
+        }
+
+        /* Терминал NeuroASCII */
+        #ascii-donut-container {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #neuro-status {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #0f0;
+            white-space: pre-wrap;
+            margin-bottom: 4px;
+        }
+
+        #neuro-thoughts {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 10px;
+            line-height: 1.2;
+            color: #666;
+            margin-bottom: 4px;
+            max-height: 48px;
+            overflow-y: hidden;
+        }
+
+        #neuro-introspection {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 10px;
+            line-height: 1.3;
+            color: #0a0;
+            margin-top: 4px;
+            max-height: 120px;
+            overflow-y: auto;
+            border-top: 1px solid #333;
+            padding-top: 3px;
+        }
+
+        #neuro-introspection .q {
+            color: #0ff;
+        }
+
+        #neuro-introspection .a {
+            color: #0f0;
+            margin-bottom: 2px;
+        }
+
+        #neuro-introspection .assess {
+            color: #ff0;
+            margin-top: 3px;
+        }
+
+        #ascii-donut {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 7px;
+            line-height: 7px;
+            white-space: pre;
+            text-align: left;
+            user-select: none;
+            color: #0f0;
+        }
+
+        #neuro-footer {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 10px;
+            color: #555;
+            border-top: 1px solid #333;
+            padding-top: 3px;
+            margin-top: 4px;
+        }
+        
+        /* Курсор мыши при перетаскивании */
+        .draggable .title-bar {
+            cursor: move;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-bar">
+        <div class="menu-item" style="padding-top:2px;">
+            <svg width="14" height="14" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                <!-- Классическое яблоко -->
+                <path fill="#000" d="M12.5 6.6c-1.3 0-1.8 1-1.8 1s-.5-1.2-1.7-1.2-2 1.4-2 1.4c-1.1 1.7-1 4.5 1 6.5C9.2 15.4 10.3 16 10.3 16s1.1-.6 2.3-1.7c2-2 2-4.8 1-6.5-0.1 0-0.7-1.2-1.1-1.2zM9.5 3.5C8 3.5 8 5 8 5s2 0 2-1 c0-1.2-.5-1.5-.5-1.5z"/>
+            </svg>
+        </div>
+        <div class="menu-item">File</div>
+        <div class="menu-item">Edit</div>
+        <div class="menu-item">View</div>
+        <div class="menu-item">Special</div>
+        <div style="flex:1"></div>
+        <div class="menu-item" id="clock">Thu 6:14 PM</div>
+    </div>
+
+    <div class="desktop" id="desktop">
+        
+        <!-- Окно 1: astoriel_profile.txt -->
+        <div class="window draggable" style="top: 40px; left: 30px; width: 380px;">
+            <div class="title-bar">
+                <div class="close-box"></div>
+                <div class="title-text">astoriel_profile.txt</div>
+            </div>
+            <div class="window-content">
+                <h1>astoriel</h1>
+                <p><b>// Системный разработчик, исследователь интерфейсов и минималист.</b></p>
+                <p>Привет. Я astoriel. Я создаю цифровые продукты, которые не перегружают процессор и внимание пользователя. Мой код весит мало и работает быстро.</p>
+                <p>В мире сайтов по 5 мегабайт, этот весит всего пару килобайт. Использование классических интерфейсов — это не просто стильно. Это дань уважения к ресурсам устройства.</p>
+                <p>Связаться со мной: <a href="mailto:hello@astoriel.net">hello@astoriel.net</a></p>
+            </div>
+        </div>
+
+        <!-- Окно 2: Избранные проекты -->
+        <div class="window draggable" style="top: 100px; left: 450px; width: 350px;">
+            <div class="title-bar">
+                <div class="close-box"></div>
+                <div class="title-text">Projects & Skills</div>
+            </div>
+            <div class="window-content">
+                <h2>[ Избранные проекты ]</h2>
+                <div class="project">
+                    <span class="project-title">project_zero.exe</span>
+                    <a href="#">demo</a> | <a href="#">github</a>
+                    <span class="project-desc">Минималистичный текстовый редактор в браузере без зависимостей.</span>
+                </div>
+                <div class="project">
+                    <span class="project-title">14kb_framework</span>
+                    <a href="#">demo</a> | <a href="#">github</a>
+                    <span class="project-desc">CSS-фреймворк, который помещается на одну дискету.</span>
+                </div>
+                
+                <h2>[ Навыки ]</h2>
+                <ul>
+                    <li>HTML5 / CSS3 / Vanilla JS (No frameworks)</li>
+                    <li>Performance Optimization (0kb overhead)</li>
+                    <li>UI/UX Classic OS Design</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Окно 3: NeuroASCII -->
+        <div class="window draggable" id="neuro-window" style="top: 340px; left: 60px; width: 600px;">
+            <div class="title-bar">
+                <div class="close-box"></div>
+                <div class="title-text">NeuroASCII.app</div>
+            </div>
+            <div class="window-content" id="ascii-donut-container" style="max-height:500px;">
+                <div id="neuro-status">> initializing neural network...</div>
+                <div id="neuro-thoughts"></div>
+                <div id="ascii-donut"></div>
+                <div id="neuro-introspection"></div>
+                <div id="neuro-footer"></div>
+            </div>
+        </div>
+        
+        <div class="desktop-icon" style="top: 30px; right: 20px;">
+            <div style="margin-bottom: 2px;">
+                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+                    <!-- Классический Macintosh HD -->
+                    <rect x="6" y="8" width="20" height="16" fill="#fff" stroke="#000" stroke-width="2"/>
+                    <rect x="8" y="11" width="16" height="2" fill="#000"/>
+                    <circle cx="10" cy="19" r="1" fill="#000"/>
+                </svg>
+            </div>
+            Macintosh HD
+        </div>
+
+        <div class="desktop-icon" style="bottom: 20px; right: 20px;">
+            <div style="margin-bottom: 2px;">
+                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+                    <!-- Классическая корзина System 7 -->
+                    <rect x="9" y="10" width="14" height="18" fill="#fff" stroke="#000" stroke-width="2"/>
+                    <path d="M7 10h18M13 8h6M14 8v2M18 8v2" stroke="#000" stroke-width="2"/>
+                    <path d="M12 14v10M16 14v10M20 14v10" stroke="#000" stroke-width="1.5"/>
+                </svg>
+            </div>
+            Trash
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. ЛОГИКА ПЕРЕТАСКИВАНИЯ ОКОН (DRAG & DROP) ---
+        let draggedWindow = null;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        document.querySelectorAll('.draggable').forEach(win => {
+            const titleBar = win.querySelector('.title-bar');
+            
+            // Поднять окно на передний план по клику
+            win.addEventListener('mousedown', () => {
+                document.querySelectorAll('.window').forEach(w => w.style.zIndex = 10);
+                win.style.zIndex = 20;
+            });
+
+            // Старт перетаскивания за заголовок
+            titleBar.addEventListener('mousedown', (e) => {
+                draggedWindow = win;
+                offsetX = e.clientX - win.getBoundingClientRect().left;
+                offsetY = e.clientY - win.getBoundingClientRect().top;
+            });
+            
+            // Логика кнопки закрытия (крестика)
+            const closeBtn = win.querySelector('.close-box');
+            closeBtn.addEventListener('mousedown', (e) => {
+                e.stopPropagation(); // Чтобы окно не пыталось тащиться
+                win.style.display = 'none';
+            });
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (draggedWindow) {
+                let x = e.clientX - offsetX;
+                let y = e.clientY - offsetY;
+                
+                // Ограничения вылета за экран
+                if (y < 26) y = 26; // Не пускаем под меню
+                
+                draggedWindow.style.left = x + 'px';
+                draggedWindow.style.top = y + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            draggedWindow = null;
+        });
+
+        // --- Обновление часов в меню ---
+        setInterval(() => {
+            const d = new Date();
+            const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('clock').innerText = timeStr;
+        }, 1000);
+
+
+        // --- 2. NEUROASCII — one generation per visit ---
+        (function() {
+            const statusEl = document.getElementById('neuro-status');
+            const thoughtsEl = document.getElementById('neuro-thoughts');
+            const asciiEl = document.getElementById('ascii-donut');
+            const introEl = document.getElementById('neuro-introspection');
+            const footerEl = document.getElementById('neuro-footer');
+            if (!statusEl) return;
+
+            function log(text) {
+                statusEl.textContent += '\n' + text;
+                const lines = statusEl.textContent.split('\n');
+                if (lines.length > 10) statusEl.textContent = lines.slice(-10).join('\n');
+            }
+
+            function gridSize() {
+                const c = document.getElementById('ascii-donut-container');
+                const w = c.clientWidth - 20;
+                const cols = Math.min(120, Math.max(40, Math.floor(w / 4.2)));
+                const rows = Math.min(50, Math.max(15, Math.floor(cols * 0.45)));
+                return { width: cols, height: rows };
+            }
+
+            async function generate() {
+                const g = gridSize();
+                log('> connecting to neural network...');
+
+                try {
+                    const resp = await fetch('/api/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ width: g.width, height: g.height, palette: 'standard' }),
+                    });
+
+                    const reader = resp.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buf = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        buf += decoder.decode(value, { stream: true });
+                        const parts = buf.split('\n\n');
+                        buf = parts.pop();
+                        for (const part of parts) {
+                            let ev = '', d = '';
+                            for (const ln of part.split('\n')) {
+                                if (ln.startsWith('event: ')) ev = ln.slice(7);
+                                if (ln.startsWith('data: ')) d = ln.slice(6);
+                            }
+                            if (ev && d) {
+                                try { handleEvent(ev, JSON.parse(d)); } catch(e) {}
+                            }
+                        }
+                    }
+                } catch(e) {
+                    log('> error: ' + e.message);
+                }
+            }
+
+            function handleEvent(type, data) {
+                switch(type) {
+                    case 'words':
+                        log('> words: [ ' + data.words.join(' | ') + ' ]');
+                        break;
+                    case 'searching':
+                        log('> searching image...');
+                        break;
+                    case 'image_found':
+                        log('> image: ' + (data.url === 'fallback' ? 'fallback' : 'found'));
+                        break;
+                    case 'thinking':
+                        thoughtsEl.textContent = 'think[' + data.iteration + ']: ' + data.words.slice(0, 5).join(', ');
+                        break;
+                    case 'surprise':
+                        log('> surprise=' + data.surprise.toFixed(3) + ' iters=' + data.iterations);
+                        break;
+                    case 'ascii_frame':
+                        asciiEl.textContent = data.ascii;
+                        break;
+                    case 'introspection_start':
+                        introEl.innerHTML = '<div class="q">--- self-analysis ---</div>';
+                        break;
+                    case 'self_question':
+                        introEl.innerHTML += '<div class="q">Q: ' + data.question + '</div>';
+                        introEl.innerHTML += '<div class="a">A: ' + data.answer + '</div>';
+                        introEl.scrollTop = introEl.scrollHeight;
+                        break;
+                    case 'self_assessment':
+                        introEl.innerHTML += '<div class="assess">score=' + data.score.toFixed(2) + ' | ' + data.category + ' | ' + data.recommendation + '</div>';
+                        introEl.scrollTop = introEl.scrollHeight;
+                        break;
+                    case 'learning':
+                        log('> learned: loss=' + data.total_loss.toFixed(4));
+                        break;
+                    case 'memory':
+                        log('> stored in memory (' + data.total_memories + ' total)');
+                        break;
+                    case 'done':
+                        footerEl.textContent = 'done in ' + data.total_time_ms + 'ms | generation complete';
+                        log('> done.');
+                        break;
+                }
+            }
+
+            // Single generation on page load
+            setTimeout(generate, 800);
+        })();
+    </script>
+</body>
+</html>
