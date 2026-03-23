@@ -1,32 +1,46 @@
-<style>
-.wc::-webkit-scrollbar, #ntl::-webkit-scrollbar { display: none; }
-.wc, #ntl { -ms-overflow-style: none; scrollbar-width: none; }
-#asc{background:#fff;color:#000;padding:0;overflow:hidden;width:420px;min-height:380px;position:relative;}
-.nl{position:absolute;top:10px;left:10px;right:10px;bottom:10px;background:#fff;display:flex;flex-direction:column;transition:opacity 0.3s;}
-#ntl{z-index:2;overflow-y:auto;}
-#nil{z-index:1;opacity:0;align-items:center;justify-content:center;}
-.mono{font-family:"Courier New",Courier,monospace;}
-#ns{font-size:11px;line-height:1.4;white-space:pre-wrap;margin-bottom:4px;font-weight:bold;}
-#nt{font-size:10px;line-height:1.2;color:#555;margin-bottom:4px;}
-#ni{font-size:10px;line-height:1.3;margin-top:4px;border-top:1px dotted #000;padding-top:3px;}
-#nx{font-size:11px;line-height:1.4;margin-bottom:4px;padding:3px 0;border-bottom:1px dotted #000;white-space:pre-wrap;}
-#nr{font-size:10px;line-height:1.3;color:#333;margin:4px 0;padding:3px 0;}
-#ad{font-size:7px;line-height:7px;white-space:pre;text-align:left;user-select:none;}
-#nf{font-size:10px;color:#555;border-top:1px solid #333;padding-top:3px;margin-top:4px;}
-.doubt{font-style:italic;color:#555;} .confirm{font-weight:bold;} .question{text-decoration:underline;}
-.ni .q{font-weight:bold;} .ni .a{margin-bottom:2px;} .ni .ass{font-style:italic;margin-top:3px;}
-.nr .comp{font-weight:bold;} .nr .d-msg{font-style:italic;} .nr .step{color:#666;} .nr .ref{font-weight:bold;}
-</style>
-<div class="wc" id="asc">
-    <div id="ntl" class="nl mono">
-        <div id="ns">> initializing neural network v2...</div>
-        <div id="nt"></div><div id="nx"></div><div id="nr"></div><div id="ni"></div>
-    </div>
-    <div id="nil" class="nl mono">
-        <div id="ad"></div><div id="nf"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroASCII v2</title>
+    <style>
+        body { background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif; }
+        #neuro-window { border: 2px solid #fff; box-shadow: 4px 4px 0 #fff; max-width: 100%; transition: all 0.3s; }
+        .wc::-webkit-scrollbar, #ntl::-webkit-scrollbar { display: none; }
+        .wc, #ntl { -ms-overflow-style: none; scrollbar-width: none; }
+        #asc{background:#fff;color:#000;padding:0;overflow:hidden;width:420px;min-height:380px;position:relative;}
+        .nl{position:absolute;top:10px;left:10px;right:10px;bottom:10px;background:#fff;display:flex;flex-direction:column;transition:opacity 0.3s;}
+        #ntl{z-index:2;overflow-y:auto;}
+        #nil{z-index:1;opacity:0;align-items:center;justify-content:center;}
+        .mono{font-family:"Courier New",Courier,monospace;}
+        #ns{font-size:11px;line-height:1.4;white-space:pre-wrap;margin-bottom:4px;font-weight:bold;}
+        #nt{font-size:10px;line-height:1.2;color:#555;margin-bottom:4px;}
+        #ni{font-size:10px;line-height:1.3;margin-top:4px;border-top:1px dotted #000;padding-top:3px;}
+        #nx{font-size:11px;line-height:1.4;margin-bottom:4px;padding:3px 0;border-bottom:1px dotted #000;white-space:pre-wrap;}
+        #nr{font-size:10px;line-height:1.3;color:#333;margin:4px 0;padding:3px 0;}
+        #ad{font-size:7px;line-height:7px;white-space:pre;text-align:left;user-select:none;}
+        #nf{font-size:10px;color:#555;border-top:1px solid #333;padding-top:3px;margin-top:4px;}
+        .doubt{font-style:italic;color:#555;} .confirm{font-weight:bold;} .question{text-decoration:underline;}
+        .ni .q{font-weight:bold;} .ni .a{margin-bottom:2px;} .ni .ass{font-style:italic;margin-top:3px;}
+        .nr .comp{font-weight:bold;} .nr .d-msg{font-style:italic;} .nr .step{color:#666;} .nr .ref{font-weight:bold;}
+    </style>
+</head>
+<body>
+<div id="neuro-window">
+    <div class="wc" id="asc">
+        <div id="ntl" class="nl mono">
+            <div id="ns">> initializing neural network v2...</div>
+            <div id="nt"></div><div id="nx"></div><div id="nr"></div><div id="ni"></div>
+        </div>
+        <div id="nil" class="nl mono">
+            <div id="ad"></div><div id="nf"></div>
+        </div>
     </div>
 </div>
+
 <script>
+    const API_BASE_URL = "https://yakubq2-neuro-ascii-api.hf.space";
     (function(){
         const NW=document.getElementById('neuro-window'), ntl=document.getElementById('ntl'), nil=document.getElementById('nil'), ns=document.getElementById('ns'), ad=document.getElementById('ad'), nf=document.getElementById('nf');
         let aF=[], aI=null;
@@ -47,13 +61,14 @@
             }catch(e){ns.innerHTML+=`\n> error: ${e.message}`;}
         }
 
-        function S(id, h) { document.getElementById(id).innerHTML=h; }
-        function App(id, h) { document.getElementById(id).innerHTML+=h; ntl.scrollTop=ntl.scrollHeight; }
+        function S(id, h) { let e=document.getElementById(id); if(e) e.innerHTML=h; }
+        function App(id, h) { let e=document.getElementById(id); if(e){e.innerHTML+=h; ntl.scrollTop=ntl.scrollHeight;} }
 
         function hE(t, d) {
             if(t==='config'){
-                if(d.window_style) Object.assign(NW.style, d.window_style);
-                if(d.container_style) Object.assign(document.getElementById('asc').style, d.container_style);
+                if(d.window_style && NW) Object.assign(NW.style, d.window_style);
+                let asc = document.getElementById('asc');
+                if(d.container_style && asc) Object.assign(asc.style, d.container_style);
                 ns.innerHTML='> connected...'; S('nt',''); S('nx',''); S('nr',''); S('ni',''); ad.innerHTML='';
                 aF=[]; if(aI){clearInterval(aI);aI=null;}
             } 
@@ -71,3 +86,5 @@
         setTimeout(conn, 800);
     })();
 </script>
+</body>
+</html>
